@@ -1,0 +1,50 @@
+---
+# tasks file for elastic
+
+- name: include secrets
+  include_vars: "{{ item }}"
+  no_log: true
+  with_items:
+    - "{{ inventory_dir }}/vars.yml"
+    - "{{ inventory_dir }}/vault.yml"
+    - "{{ inventory_dir }}/vault_files/efk.yml"
+  ignore_errors: True
+  tags: always
+
+- name: Get bind ip
+  set_fact:
+    bind_ip: "{{ item }}"
+  with_items: "{{ ansible_all_ipv4_addresses }}"
+  when: "item.startswith('{{ local_net }}')"
+
+- name: main | get fluentbit user
+  set_fact:
+    fluentbit_user: "{{ item }}"
+  no_log: true
+  with_items: "{{ elastic_users }}"
+  when: item["name"] == "fluentbit"
+
+- name: main | create project dir
+  file:
+    path: "{{ fluentbit_project_directory }}"
+    state: directory
+    recurse: yes
+
+- name: main | template project
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ fluentbit_project_directory }}/{{ item.dest }}"
+  with_items:
+    - {src: "docker-compose.yml.j2", dest: "docker-compose.yml"}
+    - {src: "fluent-bit.conf.j2", dest: "fluent-bit.conf"}
+
+- name: main | Running service
+  docker_compose:
+    project_src: "{{ fluentbit_project_directory }}"
+    project_name: "{{ fluentbit_project_name }}"
+    pull: yes
+    restarted: yes
+  register: output
+
+- debug:
+    var: output

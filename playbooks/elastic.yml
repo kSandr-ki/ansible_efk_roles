@@ -1,0 +1,8 @@
+---
+- name: deploy elastic
+  strategy: debug
+  debugger: on_failed
+  hosts: elastic_cluster
+  gather_facts: yes
+  roles:
+    - role: efk/elastic

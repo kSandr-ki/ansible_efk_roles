@@ -1,0 +1,22 @@
+version: '3'
+services:
+  elastic:
+    image: {{ elastic_image }}
+    restart: always
+    network_mode: host
+    environment:
+{% for item in envs.keys() %}
+      {{ item }}: "{{ envs[item] }}"
+{% endfor %}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./data:/usr/share/elasticsearch/data
+      - ./internal_users.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/internal_users.yml
+      - ./roles.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/roles.yml
+

@@ -1,0 +1,17 @@
+---
+# defaults file for kibana
+kibana_image: amazon/opendistro-for-elasticsearch-kibana:1.1.0
+kibana_project_directory: /data/docker/kibana
+kibana_project_name: "kibana"
+elastic_host: "{{ groups['elastic_cluster'][0] }}"
+kibana_domain: "kibana.com"
+envs:
+  ELASTICSEARCH_URL: "https://{{ elastic_host }}:9200"
+  ELASTICSEARCH_HOSTS: "https://{{ elastic_host }}:9200"
+  ELASTICSEARCH_USERNAME: "{{ kibana_user['name'] }}"
+  ELASTICSEARCH_PASSWORD: "{{ kibana_user['password'] }}"
+  VIRTUAL_HOST: "{{ kibana_domain }}"
+  VIRTUAL_PORT: "5601"
+
+container_ports:
+  - "5601:5601"

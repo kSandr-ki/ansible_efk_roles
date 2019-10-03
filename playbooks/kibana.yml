@@ -1,0 +1,8 @@
+---
+- name: deploy kibana
+  strategy: debug
+  debugger: on_failed
+  hosts: "{{ groups['elastic_cluster'][0] }}"
+  gather_facts: yes
+  roles:
+    - role: efk/kibana

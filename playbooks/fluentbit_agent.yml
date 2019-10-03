@@ -1,0 +1,6 @@
+---
+- name: deploy fluentbit
+  hosts: vms,!elastic_cluster
+  gather_facts: yes
+  roles:
+    - role: efk/fluentbit_agent

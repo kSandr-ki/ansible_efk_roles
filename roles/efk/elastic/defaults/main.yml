@@ -1,0 +1,26 @@
+---
+# defaults file for elastic
+elastic_image: amazon/opendistro-for-elasticsearch:1.1.0
+
+elastic_project_directory: /data/docker/elastic
+elastic_project_name: elastic
+envs:
+  cluster.name: elastic_cluster
+  node.name: "{{ inventory_hostname }}"
+  discovery.seed_hosts: "{{ groups['elastic_cluster'] | join(',') }}"
+  cluster.initial_master_nodes: "{{ groups['elastic_cluster'] | join(',') }}"
+  bootstrap.memory_lock: "true"
+  ES_JAVA_OPTS: "-Xms2048m -Xmx2048m"
+
+container_ports:
+  - 9200:9200
+  - 9300:9300
+
+elastic_users: {}
+
+elastic_users:
+  - { name: 'admin', password: 'admin', reserved: 'true', backend_roles: ['admin'], description: 'admin user'}
+  - { name: 'kibanaserver', password: 'kibanaserver', reserved: 'true', description: 'kibana user'}
+  - { name: 'kibanaro', password: 'kibanaro', reserved: 'false', backend_roles:['kibanauser', 'readall'], description:
+  - { name: 'fluentbit', password: 'fluentbit', reserved: 'false', backend_roles:['logstash'], description: 'fluentbit
+(END)

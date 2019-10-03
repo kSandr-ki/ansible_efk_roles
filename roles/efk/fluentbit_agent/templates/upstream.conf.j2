@@ -1,0 +1,10 @@
+[UPSTREAM]
+  name forward-balancing
+
+{% for node in groups['elastic_cluster'] %}
+[NODE]
+  name {{ node }}
+  host {{ node }}
+  port {{ fluentbit_server_port }}
+
+{% endfor %}

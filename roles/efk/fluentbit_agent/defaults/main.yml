@@ -1,0 +1,56 @@
+---
+# defaults file for fluentbit
+fluentbit_image: fluent/fluent-bit
+fluentbit_project_directory: /data/docker/fluentbit
+fluentbit_project_name: fluentbit
+fluentbit_server_port: 24224
+
+container_custom_volumes: []
+container_default_volumes:
+  - "./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf"
+  - "./upstream.conf:/fluent-bit/etc/upstream.conf"
+  - "./db:/db"
+  - "./docker-metadata.lua:/fluent-bit/docker-metadata.lua"
+  - "/data/lib/docker/containers:/var/lib/docker/containers:ro"
+  - "/data/docker:/data/docker:ro"
+
+container_volumes: "{{ (container_default_volumes + container_custom_volumes) }}"
+
+SERVICE:
+  Flush: "5"
+  Daemon: "Off"
+  Log_Level: "info"
+  Parsers_File: "/fluent-bit/etc/parsers.conf"
+
+INPUTS:
+  - Name:   "forward"
+    Listen: "127.0.0.1"
+    Port:   "24224"
+  - Name: "tail"
+    Path: "/var/lib/docker/containers/*/*.log"
+    Parser: "docker"
+    DB: "/db/docker.db"
+    Mem_Buf_Limit: "5MB"
+    Refresh_Interval: "10"
+    ignore_older: "6h"
+    Tag: "source.docker.<file_name>"
+    Tag_Regex: "(?<file_name>.+)"
+    Docker_Mode: "On"
+
+FILTERS:
+  - Name: "lua"
+    Match: "source.docker.*"
+    script: "/fluent-bit/docker-metadata.lua"
+    call: "encrich_with_docker_metadata"
+  - Name: "record_modifier"
+    Match: "*"
+    Record: "hostname ${HOSTNAME}"
+  - Name: "parser"
+    Match: "source.docker.*"
+    Key_Name: "log"
+    Parser: "json"
+
+OUTPUTS:
+  - Name: "forward"
+    Upstream: "/fluent-bit/etc/upstream.conf"
+    Match: "*"

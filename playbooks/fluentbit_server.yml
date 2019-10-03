@@ -1,0 +1,6 @@
+---
+- name: deploy fluentbit
+  hosts: elastic_cluster
+  gather_facts: yes
+  roles:
+    - role: efk/fluentbit_server

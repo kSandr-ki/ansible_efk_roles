@@ -1,0 +1,30 @@
+[SERVICE]
+{% for item in SERVICE.keys() %}
+  {{ item }} {{ SERVICE[item] }}
+{% endfor %}
+
+
+{% for input in INPUTS %}
+[INPUT]
+{% for item in input.keys() %}
+  {{ item }} {{ input[item] }}
+{% endfor %}
+
+{% endfor %}
+
+
+{% for filter in FILTERS %}
+[FILTER]
+{% for item in filter.keys() %}
+  {{ item }} {{ filter[item] }}
+{% endfor %}
+
+{% endfor %}
+
+{% for output in OUTPUTS %}
+[OUTPUT]
+{% for item in output.keys() %}
+  {{ item }} {{ output[item] }}
+{% endfor %}
+
+{% endfor %}

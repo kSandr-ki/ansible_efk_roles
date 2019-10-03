@@ -1,0 +1,17 @@
+version: '3'
+services:
+  kibana:
+    image: {{ kibana_image }}
+    restart: always
+    expose:
+      - 5601
+    environment:
+{% for item in envs.keys() %}
+      {{ item }}: "{{ envs[item] }}"
+{% endfor %}
+{% if container_ports is defined %}
+    ports:
+{% for port in container_ports %}
+      - {{ port }}
+{% endfor %}
+{% endif %}

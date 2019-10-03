@@ -1,0 +1,38 @@
+---
+# tasks file for fluentbit
+- name: main | Create project dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - "{{ fluentbit_project_directory }}"
+    - "{{ fluentbit_project_directory }}/db"
+
+
+- name: main | Template project
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ fluentbit_project_directory }}/{{ item.dest }}"
+  with_items:
+    - {src: "docker-compose.yml.j2", dest: "docker-compose.yml"}
+    - {src: "fluent-bit.conf.j2", dest: "fluent-bit.conf"}
+    - {src: "upstream.conf.j2", dest: "upstream.conf"}
+
+
+- name: main | Copy lua metadata script
+  copy:
+    src: "docker-metadata.lua"
+    dest: "{{ fluentbit_project_directory }}/docker-metadata.lua"
+
+
+- name: main | Running service
+  docker_compose:
+    project_src: "{{ fluentbit_project_directory }}"
+    project_name: "{{ fluentbit_project_name }}"
+    pull: yes
+    restarted: yes
+  register: output
+
+- debug:
+    var: output
